@@ -35,6 +35,7 @@ except ImportError:
             return self.basedir
 
 _use_vault_cache = os.environ.get("ANSIBLE_HASHICORP_VAULT_USE_CACHE", "yes").lower() in ("yes", "1", "true")
+print('INITIALIZING CACHE')
 _vault_cache = {}
 
 DISABLE_VAULT_CAHOSTVERIFY = "no"
@@ -142,13 +143,16 @@ class LookupModule(LookupBase):
                                '(Current $HOME value is ' + os.getenv('HOME') + ')')
 
         if _use_vault_cache and key in _vault_cache:
+            print('HIT! Found {}'.format(key))
             result = _vault_cache[key]
         else:
+            print('MISS! Found {}'.format(key))
             if not vault_token:
                 token_result = self._fetch_github_token(cafile, capath, github_token, url, cahostverify, skipverify)
                 vault_token = token_result['auth']['client_token']
             result = self._fetch_remotely(cafile, capath, data, key, vault_token, url, cahostverify, skipverify)
             if _use_vault_cache:
+                print('Setting {} in cache'.format(key))
                 _vault_cache[key] = result
 
         if type(result) is dict:
